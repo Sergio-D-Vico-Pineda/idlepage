@@ -51,9 +51,9 @@
             </article>
 
             <!-- Minimal Calendar -->
-            <article class="w-full max-w-3xl animate-fade-in-down">
+            <article class="min-w-96 max-w-2xl animate-fade-in-down">
                 <div
-                    class="p-4 overflow-hidden transition-all duration-500 border group bg-black/40 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black/60">
+                    class="py-4 px-5 overflow-hidden transition-all duration-500 border group bg-black/40 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black/60">
                     <div class="flex items-center justify-between pb-2 mb-3 border-b border-neutral-900">
                         <div class="flex items-center gap-2 text-red-600">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
@@ -67,7 +67,7 @@
                             <span id="cal-day-count"
                                 class="text-[11px] text-red-500/70 font-sf-mono cursor-help"></span>
                             <button id="cal-today"
-                                class="text-[10px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
+                                class="text-[11px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
                                 type="button">
                                 TODAY
                             </button>
@@ -97,7 +97,7 @@
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-7 gap-1 mt-3 text-[10px] text-neutral-600 font-sf-mono">
+                    <div class="grid grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600 font-sf-mono">
                         <span class="text-center">M</span>
                         <span class="text-center">T</span>
                         <span class="text-center">W</span>
@@ -107,7 +107,7 @@
                         <span class="text-center">S</span>
                     </div>
 
-                    <div id="cal-grid" class="grid grid-cols-7 gap-1 mt-2"></div>
+                    <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
                 </div>
         </section>
 
