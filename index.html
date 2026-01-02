@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Page</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="shortcut icon" href="favicon.ico" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="grid min-h-screen overflow-x-hidden selection:bg-red-900/30 selection:text-white place-items-center">
+
+    <!-- Corner LED Indicators -->
+    <!-- <div class="fixed z-50 flex items-center gap-3 top-8 left-8 opacity-80">
+        <div class="led-red"></div>
+        <span class="text-[10px] font-mono text-red-900 tracking-widest hidden sm:inline">SYS.ONLINE</span>
+    </div>
+    <div class="fixed z-50 top-8 right-8 opacity-80">
+        <div class="led-red" style="animation-delay: 1.5s;"></div>
+    </div>
+    <div class="fixed z-50 bottom-8 left-8 opacity-80">
+        <div class="led-red" style="animation-delay: 0.5s;"></div>
+    </div>
+    <div class="fixed z-50 bottom-8 right-8 opacity-80">
+        <div class="led-red" style="animation-delay: 2s;"></div>
+    </div> -->
+
+    <!-- Main Content -->
+    <main class="relative z-10 w-full max-w-6xl px-6 py-12">
+
+        <!-- Clock + Calendar -->
+        <section class="flex flex-col items-center gap-16">
+            <!-- Clock -->
+            <article class="relative flex flex-col text-center gap-y-4 animate-fade-in-down w-fit">
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+                    <div class="w-full h-full blur-2xl bg-red-900 rounded-full"></div>
+                </div>
+                <h1 id="clock-time"
+                    class="w-fit mx-auto text-7xl md:text-8xl text-white tracking-tighter font-['SF_UI_Display_Semibold']">
+                    00:00
+                </h1>
+                <p id="clock-date"
+                    class="text-neutral-500 font-bold tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
+                    Loading...
+                </p>
+            </article>
+
+            <!-- Minimal Calendar -->
+            <article class="w-full max-w-3xl animate-fade-in-down">
+                <div
+                    class="p-4 overflow-hidden transition-all duration-500 border group bg-black/40 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black/60">
+                    <div class="flex items-center justify-between pb-2 mb-3 border-b border-neutral-900">
+                        <div class="flex items-center gap-2 text-red-600">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z" />
+                            </svg>
+                            <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Calendar</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="cal-day-count"
+                                class="text-[11px] text-red-500/70 font-sf-mono cursor-help"></span>
+                            <button id="cal-today"
+                                class="text-[10px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
+                                type="button">
+                                TODAY
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <button id="cal-prev" type="button"
+                            class="p-1 text-neutral-600 hover:text-white transition-colors" aria-label="Previous month">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z" />
+                            </svg>
+                        </button>
+                        <div class="text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
+                            id="cal-month">
+                            --
+                        </div>
+                        <button id="cal-next" type="button"
+                            class="p-1 text-neutral-600 hover:text-white transition-colors" aria-label="Next month">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9.293 18.707a1 1 0 0 1 0-1.414L14.586 12 9.293 6.707a1 1 0 0 1 1.414-1.414l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1 mt-3 text-[10px] text-neutral-600 font-sf-mono">
+                        <span class="text-center">M</span>
+                        <span class="text-center">T</span>
+                        <span class="text-center">W</span>
+                        <span class="text-center">T</span>
+                        <span class="text-center">F</span>
+                        <span class="text-center">S</span>
+                        <span class="text-center">S</span>
+                    </div>
+
+                    <div id="cal-grid" class="grid grid-cols-7 gap-1 mt-2"></div>
+                </div>
+        </section>
+
+        <!-- News Panel
+        <div class="w-full max-w-2xl mx-auto mb-20 group">
+            <div
+                class="bg-black/50 border border-neutral-900 rounded-xl p-6 relative overflow-hidden min-h-[140px] flex flex-col justify-center transition-all duration-500 hover:border-red-900/30">
+                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
+                    <div class="flex items-center gap-2 text-red-600">
+                        <i data-lucide="rss" width="16" height="16"></i>
+                        <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Net.News</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] text-neutral-600 font-sf-mono hidden sm:inline">UPDATED: <span
+                                id="news-time">--:--</span></span>
+                        <button id="skip-news-button"
+                            class="transition-colors text-neutral-600 hover:text-red-500 focus:outline-none"
+                            title="Next News">
+                            <i data-lucide="skip-forward" width="14" height="14"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="z-10 flex flex-col gap-1">
+                    <h3 id="news-headline" class="text-lg font-bold text-white transition-all duration-500 md:text-xl">
+                        Initializing feed...
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <span id="news-tag"
+                            class="text-xs font-bold bg-red-900/20 text-red-500 px-2 py-0.5 rounded border border-red-900/30 uppercase tracking-wider">
+                            SYSTEM
+                        </span>
+                        <p id="news-source"
+                            class="font-mono text-xs tracking-wide transition-all duration-500 text-neutral-500">
+                            Waiting for data stream
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute p-4 -bottom-4 -right-4 opacity-10 rotate-12">
+                    <i data-lucide="activity" width="80" height="80" class="text-red-800"></i>
+                </div>
+                <div class="absolute bottom-0 left-0 h-[2px] bg-red-900/20 w-full">
+                    <div id="news-progress" class="h-full bg-red-600 shadow-[0_0_10px_#ef4444]" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>  -->
+
+        <!-- Link Categories 
+        <div class="grid w-full max-w-3xl mx-auto grid-cols-1 gap-4 md:grid-cols-3">
+            <div
+                class="p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
+                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="terminal" width="18" height="18"
+                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
+                        <h2
+                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
+                            Dev.
+                        </h2>
+                    </div>
+                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"></div>
+                </div>
+                <ul class="space-y-1.5">
+                    <li>
+                        <a href="https://github.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="github" width="16" height="16"></i>
+                            <span class="font-medium">GitHub</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://vercel.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="cloud" width="16" height="16"></i>
+                            <span class="font-medium">Vercel</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div
+                class="relative p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
+                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="globe" width="18" height="18"
+                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
+                        <h2
+                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
+                            Social
+                        </h2>
+                    </div>
+                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"
+                        style="animation-delay: 0.5s;"></div>
+                </div>
+                <ul class="space-y-1.5">
+                    <li>
+                        <a href="https://reddit.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="external-link" width="16" height="16"></i>
+                            <span class="font-medium">
+                                Reddit
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://youtube.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="youtube" width="16" height="16"></i>
+                            <span class="font-medium">
+                                YouTube
+                            </span>
+                        </a>
+                    </li>
+                    <li><a href="https://twitch.tv"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="twitch" width="16" height="16"></i>
+                            <span class="font-medium">
+                                Twitch
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div
+                class="relative p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
+                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="music" width="18" height="18"
+                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
+                        <h2
+                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
+                            Music
+                        </h2>
+                    </div>
+                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"
+                        style="animation-delay: 1s;"></div>
+                </div>
+                <ul class="space-y-1.5">
+                    <li>
+                        <a href="https://spotify.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="music-2" width="16" height="16"></i>
+                            <span class="font-medium">
+                                Spotify
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://music.youtube.com"
+                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
+                            <i data-lucide="disc-3" width="16" height="16"></i>
+                            <span class="font-medium">
+                                YouTube Music
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div> -->
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 w-full py-6 text-xs text-center pointer-events-none text-neutral-900">
+        <p>Idle Page • Scarpy • <span id="year"></span></p>
+    </footer>
+
+    <script>
+        // --- UI FUNCTIONS ---
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            let timeStr = now.toLocaleTimeString('en-GB', { hour12: true, hour: 'numeric', minute: '2-digit' });
+            let dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric' });
+
+            timeStr = timeStr.replace('am', 'a').replace('pm', 'p')
+
+            document.getElementById('clock-time').innerText = timeStr;
+            document.getElementById('clock-date').innerText = dateStr;
+            document.getElementById('year').innerText = now.getFullYear();
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+
+    </script>
+    <script src="calendar.js"></script>
+    <script src="timeandnews.js"></script>
+</body>
+
+</html>
