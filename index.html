@@ -6,9 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Idle Page</title>
     <link rel="icon" href="favicon.ico" />
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#000000">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="A quiet clock, date and calendar for your idle tab.">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Idle Page">
 
-    <link rel="stylesheet" href="./tailwind.css?v=1">
-    <link rel="stylesheet" href="./style.css?v=5">
+    <link rel="stylesheet" href="./tailwind.css?v=2">
+    <link rel="stylesheet" href="./style.css?v=6">
 
     <!-- Critical layout, inline on purpose: it must never depend on a cached stylesheet -->
     <style>
@@ -42,6 +50,12 @@
             line-height: 1.05;
         }
 
+        /* The date keeps a fixed ratio with the clock so both scale together.
+           12px is the legibility floor for small viewports. */
+        #clock-date {
+            font-size: max(0.75rem, calc(clamp(3.5rem, 11dvh, 6rem) / 5.5));
+        }
+
         .hero {
             gap: clamp(2rem, 7dvh, 4rem);
         }
@@ -59,7 +73,7 @@
 
         <!-- Main Content -->
         <!-- flex-1 / justify-center come from .app>main in the inline styles -->
-        <main class="relative z-10 flex w-full max-w-6xl flex-col mx-auto px-4 sm:px-6">
+        <main class="relative z-10 flex w-full max-w-6xl flex-col mx-auto px-4">
 
             <!-- Clock + Calendar -->
             <section class="hero flex flex-col items-center">
@@ -69,19 +83,19 @@
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
                         <div class="w-full h-full blur-2xl bg-red-900 rounded-full"></div>
                     </div>
-                    <h1 id="clock-time"
+                    <h1
                         class="w-fit max-w-full text-white tracking-tighter font-['SF_UI_Display_Semibold']">
-                        00:00
+                        <time id="clock-time" role="timer" aria-live="off" datetime="">00:00</time>
                     </h1>
-                    <p id="clock-date"
-                        class="px-2 text-sm sm:text-base text-neutral-500 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
+                    <time id="clock-date" datetime=""
+                        class="px-2 text-neutral-500 font-bold tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
                         Loading...
-                    </p>
+                    </time>
                 </article>
 
                 <!-- Minimal Calendar -->
                 <article
-                    class="group flex w-full min-w-0 max-w-[25rem] flex-col overflow-hidden rounded-lg border border-neutral-900 bg-black/40 px-4 py-4 transition-all duration-500 animate-fade-in-down hover:border-red-900/30 hover:bg-black/60 sm:px-5">
+                    class="group flex w-full min-w-0 max-w-100 flex-col overflow-hidden rounded-lg border border-neutral-900 bg-black/40 px-4 py-4 transition-all duration-500 animate-fade-in-down hover:border-red-900/30 hover:bg-black/60">
                     <div
                         class="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-2 mb-3 border-b border-neutral-900">
                         <div class="flex min-w-0 items-center gap-2 text-red-600">
@@ -113,7 +127,7 @@
                             </svg>
                         </button>
                         <div class="truncate text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
-                            id="cal-month">
+                            id="cal-month" aria-live="polite">
                             --
                         </div>
                         <button id="cal-next" type="button"
@@ -127,7 +141,8 @@
                         </button>
                     </div>
 
-                    <div class="grid shrink-0 grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600">
+                    <div class="grid shrink-0 grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600"
+                        aria-hidden="true">
                         <span class="text-center">M</span>
                         <span class="text-center">T</span>
                         <span class="text-center">W</span>
@@ -137,7 +152,8 @@
                         <span class="text-center">S</span>
                     </div>
 
-                    <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
+                    <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2" role="group"
+                        aria-label="Days of the month"></div>
                 </article>
             </section>
 
@@ -145,13 +161,20 @@
 
         <!-- Footer -->
         <footer
-            class="w-full py-4 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] px-4 text-xs text-center pointer-events-none text-neutral-900">
-            <p>Idle Page ÔÇó Scarpy ÔÇó <span id="year"></span></p>
+            class="w-full py-4 pb-[max(1rem,env(safe-area-inset-bottom))] px-4 text-xs text-center pointer-events-none text-neutral-900">
+            <p>Idle Page • Scarpy • <span id="year"></span></p>
         </footer>
 
     </div>
-    <script src="calendar.js?v=4"></script>
-    <script src="clock.js?v=4"></script>
+    <script src="calendar.js?v=6"></script>
+    <script src="clock.js?v=6"></script>
+    <script>
+        // Offline support. Only works on https or localhost: browsers do not
+        // allow service workers on plain http origins such as a LAN IP.
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => { });
+        }
+    </script>
 </body>
 
 </html>

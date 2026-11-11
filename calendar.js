@@ -1,5 +1,13 @@
 // --- Calendar Module ---
 
+const DAY_MS = 1000 * 60 * 60 * 24;
+
+// Parse a YYYY-MM-DD key as a local date (new Date('2026-11-11') would be UTC).
+function parseKey(key) {
+    const [year, month, day] = key.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
 class Calendar {
     constructor(options = {}) {
         this.state = {
@@ -35,8 +43,7 @@ class Calendar {
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const selected = new Date(this.state.selected);
-        selected.setHours(0, 0, 0, 0);
+        const selected = parseKey(this.state.selected);
 
         if (this.ymd(today) === this.state.selected) {
             dayCountEl.textContent = '';
@@ -47,29 +54,26 @@ class Calendar {
         const isFuture = selected > today;
         const [start, end] = isFuture ? [today, selected] : [selected, today];
 
-        // Calculate total days for tooltip (including both start and end dates)
-        const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+        // Total days, used for the tooltip (includes both end points)
+        const totalDays = Math.round((end - start) / DAY_MS);
 
         let years = end.getFullYear() - start.getFullYear();
         let months = end.getMonth() - start.getMonth();
         let days = end.getDate() - start.getDate();
 
-        // Adjust negative values
+        // Borrow from the previous month when the day difference is negative
         if (days < 0) {
             months--;
-            const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-            days += prevMonth.getDate();
+            days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
         }
         if (months < 0) {
             years--;
             months += 12;
         }
 
-        // Calculate weeks from remaining days
         const weeks = Math.floor(days / 7);
         days = days % 7;
 
-        // Build display string
         const parts = [];
         if (years > 0) parts.push(`${years}y`);
         if (months > 0) parts.push(`${months}m`);
@@ -92,7 +96,7 @@ class Calendar {
         const { monthEl, gridEl } = this.elements;
         if (!monthEl || !gridEl) return;
 
-        const { viewYear: year, viewMonth: month } = this.state;
+        const { viewYear: year, viewMonth: month, selected } = this.state;
 
         monthEl.textContent = this.monthLabel(year, month);
         this.updateDayCounter();
@@ -105,6 +109,7 @@ class Calendar {
         const totalCells = Math.ceil((firstDow + daysInMonth) / 7) * 7;
 
         gridEl.innerHTML = '';
+        let hasTabStop = false;
 
         for (let i = 0; i < totalCells; i++) {
             const day = new Date(year, month, 1 - firstDow + i);
@@ -112,12 +117,27 @@ class Calendar {
 
             const inMonth = day.getMonth() === month;
             const isToday = key === todayKey;
-            const isSelected = this.state.selected === key;
+            const isSelected = selected === key;
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.dataset.date = key;
             btn.textContent = String(day.getDate());
+
+            // Screen readers get the full date; the short label stays visual.
+            btn.setAttribute('aria-label', day.toLocaleDateString('en-GB', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            }));
+            if (isToday) btn.setAttribute('aria-current', 'date');
+            if (isSelected) btn.setAttribute('aria-pressed', 'true');
+
+            // Roving tab stop: one cell is reachable with Tab, arrows move inside.
+            if (isSelected) {
+                btn.tabIndex = 0;
+                hasTabStop = true;
+            } else {
+                btn.tabIndex = -1;
+            }
 
             // Build class list - days outside the month are visible but subdued
             const base = 'w-full rounded-md text-[11px] transition-all duration-200';
@@ -133,26 +153,44 @@ class Calendar {
                 isSelected && inMonth ? selectedCls : ''
             ].filter(Boolean).join(' ');
 
-            // Days outside the month navigate to their month
-            btn.addEventListener('click', () => {
-                if (inMonth) {
-                    this.selectDate(key);
-                } else {
-                    this.state.viewYear = day.getFullYear();
-                    this.state.viewMonth = day.getMonth();
-                    this.state.selected = key;
-                    this.render();
-                }
-            });
-
             gridEl.appendChild(btn);
         }
+
+        // The selected day can sit outside the visible month: keep one tab stop anyway.
+        if (!hasTabStop) gridEl.firstElementChild.tabIndex = 0;
     }
 
-    // Select a specific date
+    // Select a specific date and show its month
     selectDate(dateKey) {
+        const date = parseKey(dateKey);
         this.state.selected = dateKey;
+        this.state.viewYear = date.getFullYear();
+        this.state.viewMonth = date.getMonth();
         this.render();
+    }
+
+    // Move the selection by whole days
+    shiftDate(dateKey, days) {
+        const date = parseKey(dateKey);
+        date.setDate(date.getDate() + days);
+        return this.ymd(date);
+    }
+
+    // Move the selection by whole months, keeping the day when possible
+    shiftMonth(dateKey, months) {
+        const date = parseKey(dateKey);
+        const day = date.getDate();
+        date.setDate(1);
+        date.setMonth(date.getMonth() + months);
+        date.setDate(Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()));
+        return this.ymd(date);
+    }
+
+    // Focus a day cell after a re-render
+    focusDate(dateKey) {
+        const { gridEl } = this.elements;
+        const cell = gridEl && gridEl.querySelector(`button[data-date="${dateKey}"]`);
+        if (cell) cell.focus();
     }
 
     // Navigate to previous month
@@ -180,13 +218,53 @@ class Calendar {
         this.render();
     }
 
+    // One listener for the whole grid: cells are replaced on every render
+    onGridClick(event) {
+        const btn = event.target.closest('button[data-date]');
+        if (!btn) return;
+
+        this.selectDate(btn.dataset.date);
+        this.focusDate(btn.dataset.date);
+    }
+
+    // Keyboard support: arrows move by day/week, PageUp/Down by month
+    onGridKeydown(event) {
+        const cell = event.target.closest('button[data-date]');
+        if (!cell) return;
+
+        const key = cell.dataset.date;
+        const dayIndex = (parseKey(key).getDay() + 6) % 7; // 0 = Monday
+        let target = null;
+
+        switch (event.key) {
+            case 'ArrowLeft': target = this.shiftDate(key, -1); break;
+            case 'ArrowRight': target = this.shiftDate(key, 1); break;
+            case 'ArrowUp': target = this.shiftDate(key, -7); break;
+            case 'ArrowDown': target = this.shiftDate(key, 7); break;
+            case 'Home': target = this.shiftDate(key, -dayIndex); break;
+            case 'End': target = this.shiftDate(key, 6 - dayIndex); break;
+            case 'PageUp': target = this.shiftMonth(key, -1); break;
+            case 'PageDown': target = this.shiftMonth(key, 1); break;
+            default: return;
+        }
+
+        event.preventDefault();
+        this.selectDate(target);
+        this.focusDate(target);
+    }
+
     // Attach event listeners to navigation buttons
     attachEvents() {
-        const { prevBtn, nextBtn, todayBtn } = this.elements;
+        const { prevBtn, nextBtn, todayBtn, gridEl } = this.elements;
 
         if (prevBtn) prevBtn.addEventListener('click', () => this.prevMonth());
         if (nextBtn) nextBtn.addEventListener('click', () => this.nextMonth());
         if (todayBtn) todayBtn.addEventListener('click', () => this.goToToday());
+
+        if (gridEl) {
+            gridEl.addEventListener('click', (event) => this.onGridClick(event));
+            gridEl.addEventListener('keydown', (event) => this.onGridKeydown(event));
+        }
     }
 
     // Initialize the calendar

@@ -5,7 +5,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: local('Inter'), url('Inter.ttf') format('truetype');
+    src: local('Inter'), url('Inter.woff2') format('woff2');
 }
 
 /* Only Medium and Semibold are used in the markup. */
@@ -32,6 +32,7 @@ body {
 
 html {
     -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
 }
 
 button {
