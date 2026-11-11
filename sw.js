@@ -1,11 +1,11 @@
 // Offline cache for the app shell.
 // VERSION and ASSETS are rewritten by scripts/build.mjs on every build.
 
-const VERSION = 'bb3a68be';
+const VERSION = '6588608f';
 const ASSETS = [
     './',
     './index.html',
-    './css/tailwind.css?v=3d12eb5a',
+    './css/tailwind.css?v=c8b3edd1',
     './css/style.css?v=f3c226e0',
     './js/calendar.js?v=b784226e',
     './js/clock.js?v=c5fce605',
