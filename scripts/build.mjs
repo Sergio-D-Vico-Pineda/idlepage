@@ -15,7 +15,7 @@
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { watch } from 'node:fs';
-import { readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import resvg from '@resvg/resvg-js';
@@ -57,6 +57,26 @@ const PRECACHE = [
     './icons/apple-touch-icon.png',
     './icons/favicon.ico',
     './manifest.webmanifest'
+];
+
+// Files that end up in dist/. Keep this in sync with PRECACHE.
+const PUBLISH = [
+    'index.html',
+    'manifest.webmanifest',
+    'sw.js',
+    'css/tailwind.css',
+    'css/style.css',
+    'js/calendar.js',
+    'js/clock.js',
+    'fonts/Inter.woff2',
+    'fonts/sf-ui-display-medium.woff',
+    'fonts/sf-ui-display-semibold.woff',
+    'icons/icon.svg',
+    'icons/icon-192.png',
+    'icons/icon-512.png',
+    'icons/icon-maskable-512.png',
+    'icons/apple-touch-icon.png',
+    'icons/favicon.ico'
 ];
 
 const VERSION_REF = /"\.\/([\w./-]+)\?v=[^"]*"/g;
@@ -202,6 +222,19 @@ async function updateServiceWorker(hashes) {
     return { changed: await writeIfChanged('sw.js', source), version };
 }
 
+/* --- 4. Publish -------------------------------------------------------- */
+
+async function publish() {
+    await rm(abs('dist'), { recursive: true, force: true });
+    await mkdir(abs('dist'), { recursive: true });
+
+    for (const file of PUBLISH) {
+        const destination = abs(path.join('dist', file));
+        await mkdir(path.dirname(destination), { recursive: true });
+        await cp(abs(file), destination);
+    }
+}
+
 /* --- Build ------------------------------------------------------------- */
 
 async function build() {
@@ -212,6 +245,8 @@ async function build() {
     const index = await updateIndex();
     const worker = await updateServiceWorker(index.hashes);
 
+    await publish();
+
     const changed = [
         ...icons,
         ...(index.changed ? ['index.html'] : []),
@@ -221,7 +256,7 @@ async function build() {
     console.log(
         `build ${new Date().toLocaleTimeString()} · sw v${worker.version} · ` +
         (changed.length ? `updated ${changed.join(', ')}` : 'no cache-busting changes') +
-        ` · ${Date.now() - started}ms`
+        ` · dist/ refreshed · ${Date.now() - started}ms`
     );
 }
 
