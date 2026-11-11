@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Idle Page</title>
     <link rel="icon" href="favicon.ico" />
-    <link rel="shortcut icon" href="favicon.ico" />
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,28 +13,22 @@
 
     <!-- Critical layout, inline on purpose: it must never depend on a cached stylesheet -->
     <style>
-        html,
-        body {
+        /* Keeps the canvas black even if style.css fails to load */
+        html {
             background-color: #000;
         }
 
         :root {
             --app-h: 100dvh;
-            --clock-size: clamp(2.75rem, 9dvh, 3.75rem);
-            --hero-gap: clamp(1.25rem, 4.5dvh, 2.5rem);
+            --clock-size: clamp(3.5rem, 11dvh, 6rem);
+            --hero-gap: clamp(2rem, 7dvh, 4rem);
             --cal-cell: clamp(1.375rem, 3.9dvh, 2rem);
-        }
-
-        @media (min-width: 640px) {
-            :root {
-                --clock-size: clamp(3.5rem, 11dvh, 6rem);
-                --hero-gap: clamp(2rem, 7dvh, 4rem);
-            }
         }
 
         .app {
             display: flex;
             flex-direction: column;
+            /* 100vh is the fallback for browsers without dvh support */
             height: 100vh;
             height: var(--app-h);
             min-height: 0;
@@ -45,6 +38,7 @@
             flex: 1 1 auto;
             min-height: 0;
             padding-block: clamp(0.75rem, 2.5dvh, 2rem);
+            /* plain center first: older browsers use it and ignore the line below */
             justify-content: center;
             justify-content: safe center;
             overflow-x: hidden;
@@ -68,311 +62,104 @@
 
 <body class="overflow-x-hidden selection:bg-red-900/30 selection:text-white">
 
-    <!-- Corner LED Indicators -->
-    <!-- <div class="fixed z-50 flex items-center gap-3 top-8 left-8 opacity-80">
-        <div class="led-red"></div>
-        <span class="text-[10px] font-mono text-red-900 tracking-widest hidden sm:inline">SYS.ONLINE</span>
-    </div>
-    <div class="fixed z-50 top-8 right-8 opacity-80">
-        <div class="led-red" style="animation-delay: 1.5s;"></div>
-    </div>
-    <div class="fixed z-50 bottom-8 left-8 opacity-80">
-        <div class="led-red" style="animation-delay: 0.5s;"></div>
-    </div>
-    <div class="fixed z-50 bottom-8 right-8 opacity-80">
-        <div class="led-red" style="animation-delay: 2s;"></div>
-    </div> -->
-
     <!-- App shell: locks the layout to the real visible viewport -->
     <div class="app">
 
-    <!-- Main Content -->
-    <main class="relative z-10 flex w-full max-w-6xl flex-1 flex-col justify-center mx-auto px-4 sm:px-6">
+        <!-- Main Content -->
+        <!-- flex-1 / justify-center come from .app>main in the inline styles -->
+        <main class="relative z-10 flex w-full max-w-6xl flex-col mx-auto px-4 sm:px-6">
 
-        <!-- Clock + Calendar -->
-        <section class="hero flex flex-col items-center">
-            <!-- Clock -->
-            <article class="relative flex flex-col items-center text-center gap-y-4 animate-fade-in-down w-fit max-w-full">
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
-                    <div class="w-full h-full blur-2xl bg-red-900 rounded-full"></div>
-                </div>
-                <h1 id="clock-time"
-                    class="w-fit max-w-full mx-auto text-white tracking-tighter font-['SF_UI_Display_Semibold']">
-                    00:00
-                </h1>
-                <p id="clock-date"
-                    class="px-2 text-sm sm:text-base text-neutral-500 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
-                    Loading...
-                </p>
-            </article>
-
-            <!-- Minimal Calendar -->
-            <article
-                class="group flex w-full min-w-0 max-w-[25rem] flex-col overflow-hidden rounded-lg border border-neutral-900 bg-black/40 px-4 py-4 transition-all duration-500 animate-fade-in-down hover:border-red-900/30 hover:bg-black/60 sm:px-5">
-                <div class="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-2 mb-3 border-b border-neutral-900">
-                    <div class="flex min-w-0 items-center gap-2 text-red-600">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z" />
-                        </svg>
-                        <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Calendar</span>
+            <!-- Clock + Calendar -->
+            <section class="hero flex flex-col items-center">
+                <!-- Clock -->
+                <article
+                    class="relative flex flex-col items-center text-center gap-y-4 animate-fade-in-down w-fit max-w-full">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+                        <div class="w-full h-full blur-2xl bg-red-900 rounded-full"></div>
                     </div>
-                    <div class="flex shrink-0 items-center gap-3">
-                        <span id="cal-day-count"
-                            class="text-[11px] text-red-500/70 font-sf-mono cursor-help"></span>
-                        <button id="cal-today"
-                            class="py-1 -my-1 text-[11px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
-                            type="button">
-                            TODAY
+                    <h1 id="clock-time"
+                        class="w-fit max-w-full text-white tracking-tighter font-['SF_UI_Display_Semibold']">
+                        00:00
+                    </h1>
+                    <p id="clock-date"
+                        class="px-2 text-sm sm:text-base text-neutral-500 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
+                        Loading...
+                    </p>
+                </article>
+
+                <!-- Minimal Calendar -->
+                <article
+                    class="group flex w-full min-w-0 max-w-[25rem] flex-col overflow-hidden rounded-lg border border-neutral-900 bg-black/40 px-4 py-4 transition-all duration-500 animate-fade-in-down hover:border-red-900/30 hover:bg-black/60 sm:px-5">
+                    <div
+                        class="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-2 mb-3 border-b border-neutral-900">
+                        <div class="flex min-w-0 items-center gap-2 text-red-600">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z" />
+                            </svg>
+                            <span class="text-xs font-bold tracking-widest uppercase">Calendar</span>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-3">
+                            <span id="cal-day-count" class="text-[11px] text-red-500/70 cursor-help"></span>
+                            <button id="cal-today"
+                                class="py-1 -my-1 text-[11px] text-neutral-600 hover:text-red-500 transition-colors"
+                                type="button">
+                                TODAY
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex shrink-0 items-center justify-between gap-2">
+                        <button id="cal-prev" type="button"
+                            class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors"
+                            aria-label="Previous month">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z" />
+                            </svg>
+                        </button>
+                        <div class="truncate text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
+                            id="cal-month">
+                            --
+                        </div>
+                        <button id="cal-next" type="button"
+                            class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors"
+                            aria-label="Next month">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9.293 18.707a1 1 0 0 1 0-1.414L14.586 12 9.293 6.707a1 1 0 0 1 1.414-1.414l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0z" />
+                            </svg>
                         </button>
                     </div>
-                </div>
 
-                <div class="flex shrink-0 items-center justify-between gap-2">
-                    <button id="cal-prev" type="button"
-                        class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors" aria-label="Previous month">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z" />
-                        </svg>
-                    </button>
-                    <div class="truncate text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
-                        id="cal-month">
-                        --
+                    <div class="grid shrink-0 grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600">
+                        <span class="text-center">M</span>
+                        <span class="text-center">T</span>
+                        <span class="text-center">W</span>
+                        <span class="text-center">T</span>
+                        <span class="text-center">F</span>
+                        <span class="text-center">S</span>
+                        <span class="text-center">S</span>
                     </div>
-                    <button id="cal-next" type="button"
-                        class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors" aria-label="Next month">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.293 18.707a1 1 0 0 1 0-1.414L14.586 12 9.293 6.707a1 1 0 0 1 1.414-1.414l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0z" />
-                        </svg>
-                    </button>
-                </div>
 
-                <div class="grid shrink-0 grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600 font-sf-mono">
-                    <span class="text-center">M</span>
-                    <span class="text-center">T</span>
-                    <span class="text-center">W</span>
-                    <span class="text-center">T</span>
-                    <span class="text-center">F</span>
-                    <span class="text-center">S</span>
-                    <span class="text-center">S</span>
-                </div>
+                    <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
+                </article>
+            </section>
 
-                <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
-            </article>
-        </section>
+        </main>
 
-        <!-- News Panel
-        <div class="w-full max-w-2xl mx-auto mb-20 group">
-            <div
-                class="bg-black/50 border border-neutral-900 rounded-xl p-6 relative overflow-hidden min-h-[140px] flex flex-col justify-center transition-all duration-500 hover:border-red-900/30">
-                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
-                    <div class="flex items-center gap-2 text-red-600">
-                        <i data-lucide="rss" width="16" height="16"></i>
-                        <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Net.News</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] text-neutral-600 font-sf-mono hidden sm:inline">UPDATED: <span
-                                id="news-time">--:--</span></span>
-                        <button id="skip-news-button"
-                            class="transition-colors text-neutral-600 hover:text-red-500 focus:outline-none"
-                            title="Next News">
-                            <i data-lucide="skip-forward" width="14" height="14"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="z-10 flex flex-col gap-1">
-                    <h3 id="news-headline" class="text-lg font-bold text-white transition-all duration-500 md:text-xl">
-                        Initializing feed...
-                    </h3>
-                    <div class="flex items-center gap-3">
-                        <span id="news-tag"
-                            class="text-xs font-bold bg-red-900/20 text-red-500 px-2 py-0.5 rounded border border-red-900/30 uppercase tracking-wider">
-                            SYSTEM
-                        </span>
-                        <p id="news-source"
-                            class="font-mono text-xs tracking-wide transition-all duration-500 text-neutral-500">
-                            Waiting for data stream
-                        </p>
-                    </div>
-                </div>
-                <div class="absolute p-4 -bottom-4 -right-4 opacity-10 rotate-12">
-                    <i data-lucide="activity" width="80" height="80" class="text-red-800"></i>
-                </div>
-                <div class="absolute bottom-0 left-0 h-[2px] bg-red-900/20 w-full">
-                    <div id="news-progress" class="h-full bg-red-600 shadow-[0_0_10px_#ef4444]" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>  -->
-
-        <!-- Link Categories 
-        <div class="grid w-full max-w-3xl mx-auto grid-cols-1 gap-4 md:grid-cols-3">
-            <div
-                class="p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
-                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="terminal" width="18" height="18"
-                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
-                        <h2
-                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
-                            Dev.
-                        </h2>
-                    </div>
-                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"></div>
-                </div>
-                <ul class="space-y-1.5">
-                    <li>
-                        <a href="https://github.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="github" width="16" height="16"></i>
-                            <span class="font-medium">GitHub</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://vercel.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="cloud" width="16" height="16"></i>
-                            <span class="font-medium">Vercel</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div
-                class="relative p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
-                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="globe" width="18" height="18"
-                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
-                        <h2
-                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
-                            Social
-                        </h2>
-                    </div>
-                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"
-                        style="animation-delay: 0.5s;"></div>
-                </div>
-                <ul class="space-y-1.5">
-                    <li>
-                        <a href="https://reddit.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="external-link" width="16" height="16"></i>
-                            <span class="font-medium">
-                                Reddit
-                            </span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://youtube.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="youtube" width="16" height="16"></i>
-                            <span class="font-medium">
-                                YouTube
-                            </span>
-                        </a>
-                    </li>
-                    <li><a href="https://twitch.tv"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="twitch" width="16" height="16"></i>
-                            <span class="font-medium">
-                                Twitch
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div
-                class="relative p-4 overflow-hidden transition-all duration-500 border group bg-black/50 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black">
-                <div class="flex items-center justify-between pb-2 mb-4 border-b border-neutral-900">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="music" width="18" height="18"
-                            class="transition-colors text-neutral-500 group-hover:text-red-600"></i>
-                        <h2
-                            class="text-xs font-bold tracking-widest uppercase transition-colors text-neutral-500 group-hover:text-white">
-                            Music
-                        </h2>
-                    </div>
-                    <div class="transition-opacity duration-500 opacity-0 led-red group-hover:opacity-100"
-                        style="animation-delay: 1s;"></div>
-                </div>
-                <ul class="space-y-1.5">
-                    <li>
-                        <a href="https://spotify.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="music-2" width="16" height="16"></i>
-                            <span class="font-medium">
-                                Spotify
-                            </span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://music.youtube.com"
-                            class="flex items-center gap-4 text-[11px] transition-all text-neutral-500 hover:text-white hover:translate-x-1">
-                            <i data-lucide="disc-3" width="16" height="16"></i>
-                            <span class="font-medium">
-                                YouTube Music
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-        </div> -->
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="w-full py-4 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] px-4 text-xs text-center pointer-events-none text-neutral-900">
-        <p>Idle Page • Scarpy • <span id="year"></span></p>
-    </footer>
+        <!-- Footer -->
+        <footer
+            class="w-full py-4 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] px-4 text-xs text-center pointer-events-none text-neutral-900">
+            <p>Idle Page • Scarpy • <span id="year"></span></p>
+        </footer>
 
     </div>
-    <!-- /App shell -->
-
-    <script>
-        // --- UI FUNCTIONS ---
-
-        // Clock
-        function updateClock() {
-            const now = new Date();
-            let timeStr = now.toLocaleTimeString('en-GB', { hour12: true, hour: 'numeric', minute: '2-digit' });
-            let dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric' });
-
-            timeStr = timeStr.replace('am', 'a').replace('pm', 'p')
-
-            document.getElementById('clock-time').innerText = timeStr;
-            document.getElementById('clock-date').innerText = dateStr;
-            document.getElementById('year').innerText = now.getFullYear();
-        }
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            updateClock();
-            setInterval(updateClock, 1000);
-        });
-
-        // --- VIEWPORT ---
-        // Lock the shell to the real visible viewport so mobile browser bars
-        // (Vivaldi/Chrome/Safari) never break the vertical centering.
-        function setAppHeight() {
-            const vv = window.visualViewport;
-            const h = vv ? vv.height : window.innerHeight;
-            document.documentElement.style.setProperty('--app-h', Math.round(h) + 'px');
-        }
-        setAppHeight();
-        window.addEventListener('resize', setAppHeight, { passive: true });
-        window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 250));
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', setAppHeight, { passive: true });
-        }
-
-    </script>
-    <script src="calendar.js?v=2"></script>
-    <script src="timeandnews.js?v=2"></script>
+    <script src="calendar.js?v=3"></script>
+    <script src="timeandnews.js?v=3"></script>
 </body>
 
 </html>
