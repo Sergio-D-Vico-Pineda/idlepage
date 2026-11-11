@@ -3,17 +3,70 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Idle Page</title>
     <link rel="icon" href="favicon.ico" />
     <link rel="shortcut icon" href="favicon.ico" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style.css?v=2">
+
+    <!-- Critical layout, inline on purpose: it must never depend on a cached stylesheet -->
+    <style>
+        html,
+        body {
+            background-color: #000;
+        }
+
+        :root {
+            --app-h: 100dvh;
+            --clock-size: clamp(2.75rem, 9dvh, 3.75rem);
+            --hero-gap: clamp(1.25rem, 4.5dvh, 2.5rem);
+            --cal-cell: clamp(1.375rem, 3.9dvh, 2rem);
+        }
+
+        @media (min-width: 640px) {
+            :root {
+                --clock-size: clamp(3.5rem, 11dvh, 6rem);
+                --hero-gap: clamp(2rem, 7dvh, 4rem);
+            }
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: var(--app-h);
+            min-height: 0;
+        }
+
+        .app>main {
+            flex: 1 1 auto;
+            min-height: 0;
+            padding-block: clamp(0.75rem, 2.5dvh, 2rem);
+            justify-content: center;
+            justify-content: safe center;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #clock-time {
+            font-size: var(--clock-size);
+            line-height: 1.05;
+        }
+
+        .hero {
+            gap: var(--hero-gap);
+        }
+
+        #cal-grid>button {
+            height: var(--cal-cell);
+        }
+    </style>
 </head>
 
-<body class="grid min-h-screen overflow-x-hidden selection:bg-red-900/30 selection:text-white place-items-center">
+<body class="overflow-x-hidden selection:bg-red-900/30 selection:text-white">
 
     <!-- Corner LED Indicators -->
     <!-- <div class="fixed z-50 flex items-center gap-3 top-8 left-8 opacity-80">
@@ -30,85 +83,87 @@
         <div class="led-red" style="animation-delay: 2s;"></div>
     </div> -->
 
+    <!-- App shell: locks the layout to the real visible viewport -->
+    <div class="app">
+
     <!-- Main Content -->
-    <main class="relative z-10 w-full max-w-6xl px-6 py-12">
+    <main class="relative z-10 flex w-full max-w-6xl flex-1 flex-col justify-center mx-auto px-4 sm:px-6">
 
         <!-- Clock + Calendar -->
-        <section class="flex flex-col items-center gap-16">
+        <section class="hero flex flex-col items-center">
             <!-- Clock -->
-            <article class="relative flex flex-col text-center gap-y-4 animate-fade-in-down w-fit">
+            <article class="relative flex flex-col items-center text-center gap-y-4 animate-fade-in-down w-fit max-w-full">
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
                     <div class="w-full h-full blur-2xl bg-red-900 rounded-full"></div>
                 </div>
                 <h1 id="clock-time"
-                    class="w-fit mx-auto text-7xl md:text-8xl text-white tracking-tighter font-['SF_UI_Display_Semibold']">
+                    class="w-fit max-w-full mx-auto text-white tracking-tighter font-['SF_UI_Display_Semibold']">
                     00:00
                 </h1>
                 <p id="clock-date"
-                    class="text-neutral-500 font-bold tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
+                    class="px-2 text-sm sm:text-base text-neutral-500 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase font-['SF_UI_Display_Medium']">
                     Loading...
                 </p>
             </article>
 
             <!-- Minimal Calendar -->
-            <article class="min-w-96 max-w-2xl animate-fade-in-down">
-                <div
-                    class="py-4 px-5 overflow-hidden transition-all duration-500 border group bg-black/40 border-neutral-900 rounded-lg hover:border-red-900/30 hover:bg-black/60">
-                    <div class="flex items-center justify-between pb-2 mb-3 border-b border-neutral-900">
-                        <div class="flex items-center gap-2 text-red-600">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z" />
-                            </svg>
-                            <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Calendar</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span id="cal-day-count"
-                                class="text-[11px] text-red-500/70 font-sf-mono cursor-help"></span>
-                            <button id="cal-today"
-                                class="text-[11px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
-                                type="button">
-                                TODAY
-                            </button>
-                        </div>
+            <article
+                class="group flex w-full min-w-0 max-w-[25rem] flex-col overflow-hidden rounded-lg border border-neutral-900 bg-black/40 px-4 py-4 transition-all duration-500 animate-fade-in-down hover:border-red-900/30 hover:bg-black/60 sm:px-5">
+                <div class="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-2 mb-3 border-b border-neutral-900">
+                    <div class="flex min-w-0 items-center gap-2 text-red-600">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z" />
+                        </svg>
+                        <span class="text-xs font-bold tracking-widest uppercase font-sf-mono">Calendar</span>
                     </div>
-
-                    <div class="flex items-center justify-between">
-                        <button id="cal-prev" type="button"
-                            class="p-1 text-neutral-600 hover:text-white transition-colors" aria-label="Previous month">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z" />
-                            </svg>
-                        </button>
-                        <div class="text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
-                            id="cal-month">
-                            --
-                        </div>
-                        <button id="cal-next" type="button"
-                            class="p-1 text-neutral-600 hover:text-white transition-colors" aria-label="Next month">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M9.293 18.707a1 1 0 0 1 0-1.414L14.586 12 9.293 6.707a1 1 0 0 1 1.414-1.414l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0z" />
-                            </svg>
+                    <div class="flex shrink-0 items-center gap-3">
+                        <span id="cal-day-count"
+                            class="text-[11px] text-red-500/70 font-sf-mono cursor-help"></span>
+                        <button id="cal-today"
+                            class="py-1 -my-1 text-[11px] text-neutral-600 hover:text-red-500 transition-colors font-sf-mono"
+                            type="button">
+                            TODAY
                         </button>
                     </div>
-
-                    <div class="grid grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600 font-sf-mono">
-                        <span class="text-center">M</span>
-                        <span class="text-center">T</span>
-                        <span class="text-center">W</span>
-                        <span class="text-center">T</span>
-                        <span class="text-center">F</span>
-                        <span class="text-center">S</span>
-                        <span class="text-center">S</span>
-                    </div>
-
-                    <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
                 </div>
+
+                <div class="flex shrink-0 items-center justify-between gap-2">
+                    <button id="cal-prev" type="button"
+                        class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors" aria-label="Previous month">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z" />
+                        </svg>
+                    </button>
+                    <div class="truncate text-xs tracking-widest uppercase text-neutral-400 font-['SF_UI_Display_Medium']"
+                        id="cal-month">
+                        --
+                    </div>
+                    <button id="cal-next" type="button"
+                        class="p-2 -m-1 text-neutral-600 hover:text-white transition-colors" aria-label="Next month">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9.293 18.707a1 1 0 0 1 0-1.414L14.586 12 9.293 6.707a1 1 0 0 1 1.414-1.414l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid shrink-0 grid-cols-7 gap-2 mt-3 text-[10px] text-neutral-600 font-sf-mono">
+                    <span class="text-center">M</span>
+                    <span class="text-center">T</span>
+                    <span class="text-center">W</span>
+                    <span class="text-center">T</span>
+                    <span class="text-center">F</span>
+                    <span class="text-center">S</span>
+                    <span class="text-center">S</span>
+                </div>
+
+                <div id="cal-grid" class="grid grid-cols-7 gap-2 mt-2"></div>
+            </article>
         </section>
 
         <!-- News Panel
@@ -271,9 +326,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="fixed bottom-0 left-0 w-full py-6 text-xs text-center pointer-events-none text-neutral-900">
+    <footer class="w-full py-4 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] px-4 text-xs text-center pointer-events-none text-neutral-900">
         <p>Idle Page • Scarpy • <span id="year"></span></p>
     </footer>
+
+    </div>
+    <!-- /App shell -->
 
     <script>
         // --- UI FUNCTIONS ---
@@ -297,9 +355,24 @@
             setInterval(updateClock, 1000);
         });
 
+        // --- VIEWPORT ---
+        // Lock the shell to the real visible viewport so mobile browser bars
+        // (Vivaldi/Chrome/Safari) never break the vertical centering.
+        function setAppHeight() {
+            const vv = window.visualViewport;
+            const h = vv ? vv.height : window.innerHeight;
+            document.documentElement.style.setProperty('--app-h', Math.round(h) + 'px');
+        }
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight, { passive: true });
+        window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 250));
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setAppHeight, { passive: true });
+        }
+
     </script>
-    <script src="calendar.js"></script>
-    <script src="timeandnews.js"></script>
+    <script src="calendar.js?v=2"></script>
+    <script src="timeandnews.js?v=2"></script>
 </body>
 
 </html>

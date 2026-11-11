@@ -148,7 +148,7 @@ class Calendar {
             btn.textContent = String(day.getDate());
 
             // Build class list - days outside the month are visible but subdued
-            const base = 'h-8 w-full rounded-md text-[11px] font-sf-mono transition-all duration-200';
+            const base = 'w-full rounded-md text-[11px] font-sf-mono transition-all duration-200';
             const inactive = 'text-neutral-700 hover:text-neutral-500 hover:bg-neutral-900/30';
             const active = 'text-neutral-400 hover:text-white hover:bg-neutral-900/60';
             const todayCls = 'ring-1 ring-red-900/50 text-neutral-200 bg-red-900/10';
