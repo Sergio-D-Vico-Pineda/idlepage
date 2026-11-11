@@ -1,4 +1,4 @@
-@import "tailwindcss";
+/* Tailwind comes from the CDN in index.html; no build-time import here. */
 
 @font-face {
     font-family: 'Inter';
