@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Classes are used from the markup and from the strings built in calendar.js. */
+/* Classes are scanned in the markup and in the strings built by the scripts. */
 @source "../index.html";
-@source "../calendar.js";
-@source "../clock.js";
+@source "../js/calendar.js";
+@source "../js/clock.js";
