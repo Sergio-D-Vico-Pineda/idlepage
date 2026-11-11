@@ -1,0 +1,14 @@
+{
+  "name": "idlepage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal idle page: clock, date and calendar.",
+  "scripts": {
+    "build": "tailwindcss -i ./src/tailwind.css -o ./tailwind.css --minify",
+    "watch": "tailwindcss -i ./src/tailwind.css -o ./tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
