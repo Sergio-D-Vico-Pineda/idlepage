@@ -7,7 +7,7 @@ class Calendar {
             viewMonth: options.month || new Date().getMonth(),
             selected: options.selected || this.ymd(new Date())
         };
-        
+
         this.elements = {
             monthEl: document.getElementById('cal-month'),
             gridEl: document.getElementById('cal-grid'),
@@ -28,15 +28,6 @@ class Calendar {
         return `${date.getFullYear()}-${this.pad2(date.getMonth() + 1)}-${this.pad2(date.getDate())}`;
     }
 
-    // Calculate days between two dates
-    daysBetween(date1Str, date2Str) {
-        const d1 = new Date(date1Str);
-        const d2 = new Date(date2Str);
-        const diffTime = d2 - d1;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    }
-
     // Update day counter display
     updateDayCounter() {
         const { dayCountEl } = this.elements;
@@ -46,7 +37,7 @@ class Calendar {
         today.setHours(0, 0, 0, 0);
         const selected = new Date(this.state.selected);
         selected.setHours(0, 0, 0, 0);
-        
+
         if (this.ymd(today) === this.state.selected) {
             dayCountEl.textContent = '';
             dayCountEl.title = '';
@@ -55,10 +46,10 @@ class Calendar {
 
         const isFuture = selected > today;
         const [start, end] = isFuture ? [today, selected] : [selected, today];
-        
+
         // Calculate total days for tooltip (including both start and end dates)
         const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
-        
+
         let years = end.getFullYear() - start.getFullYear();
         let months = end.getMonth() - start.getMonth();
         let days = end.getDate() - start.getDate();
@@ -92,16 +83,8 @@ class Calendar {
 
     // Get month label (e.g., "January 2026")
     monthLabel(year, monthIndex) {
-        const d = new Date(year, monthIndex, 1);
-        return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-    }
-
-    // Calculate the start date of the calendar grid (Monday-first)
-    startOfMonthGrid(year, monthIndex) {
-        const first = new Date(year, monthIndex, 1);
-        const firstDow = (first.getDay() + 6) % 7; // Convert to Monday-first (0=Mon, 6=Sun)
-        const gridStart = new Date(year, monthIndex, 1 - firstDow);
-        return gridStart;
+        return new Date(year, monthIndex, 1)
+            .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     }
 
     // Render the calendar
@@ -109,36 +92,25 @@ class Calendar {
         const { monthEl, gridEl } = this.elements;
         if (!monthEl || !gridEl) return;
 
-        // Update month/year label
-        monthEl.textContent = this.monthLabel(this.state.viewYear, this.state.viewMonth);
+        const { viewYear: year, viewMonth: month } = this.state;
 
-        // Update day counter
+        monthEl.textContent = this.monthLabel(year, month);
         this.updateDayCounter();
 
-        // Get today's date for highlighting
-        const today = new Date();
-        const todayKey = this.ymd(today);
+        const todayKey = this.ymd(new Date());
 
-        // Clear existing grid
-        gridEl.innerHTML = '';
-
-        // Get the start of the calendar grid
-        const start = this.startOfMonthGrid(this.state.viewYear, this.state.viewMonth);
-
-        // Calculate how many rows we need
-        const firstDay = new Date(this.state.viewYear, this.state.viewMonth, 1);
-        const lastDay = new Date(this.state.viewYear, this.state.viewMonth + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const firstDow = (firstDay.getDay() + 6) % 7; // Monday-first
+        // Monday-first grid: firstDow is the weekday of the 1st (0 = Monday)
+        const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
         const totalCells = Math.ceil((firstDow + daysInMonth) / 7) * 7;
 
-        // Render calendar days
+        gridEl.innerHTML = '';
+
         for (let i = 0; i < totalCells; i++) {
-            const day = new Date(start);
-            day.setDate(start.getDate() + i);
+            const day = new Date(year, month, 1 - firstDow + i);
             const key = this.ymd(day);
 
-            const inMonth = day.getMonth() === this.state.viewMonth;
+            const inMonth = day.getMonth() === month;
             const isToday = key === todayKey;
             const isSelected = this.state.selected === key;
 
@@ -148,7 +120,7 @@ class Calendar {
             btn.textContent = String(day.getDate());
 
             // Build class list - days outside the month are visible but subdued
-            const base = 'w-full rounded-md text-[11px] font-sf-mono transition-all duration-200';
+            const base = 'w-full rounded-md text-[11px] transition-all duration-200';
             const inactive = 'text-neutral-700 hover:text-neutral-500 hover:bg-neutral-900/30';
             const active = 'text-neutral-400 hover:text-white hover:bg-neutral-900/60';
             const todayCls = 'ring-1 ring-red-900/50 text-neutral-200 bg-red-900/10';
@@ -161,12 +133,11 @@ class Calendar {
                 isSelected && inMonth ? selectedCls : ''
             ].filter(Boolean).join(' ');
 
-            // Add click handler - days outside the month navigate to their month
+            // Days outside the month navigate to their month
             btn.addEventListener('click', () => {
                 if (inMonth) {
                     this.selectDate(key);
                 } else {
-                    // Navigate to the month of the clicked date
                     this.state.viewYear = day.getFullYear();
                     this.state.viewMonth = day.getMonth();
                     this.state.selected = key;
@@ -213,17 +184,9 @@ class Calendar {
     attachEvents() {
         const { prevBtn, nextBtn, todayBtn } = this.elements;
 
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.prevMonth());
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.nextMonth());
-        }
-
-        if (todayBtn) {
-            todayBtn.addEventListener('click', () => this.goToToday());
-        }
+        if (prevBtn) prevBtn.addEventListener('click', () => this.prevMonth());
+        if (nextBtn) nextBtn.addEventListener('click', () => this.nextMonth());
+        if (todayBtn) todayBtn.addEventListener('click', () => this.goToToday());
     }
 
     // Initialize the calendar
@@ -234,12 +197,13 @@ class Calendar {
 }
 
 // Auto-initialize on DOM ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.calendar = new Calendar();
-        window.calendar.init();
-    });
-} else {
+function initCalendar() {
     window.calendar = new Calendar();
     window.calendar.init();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalendar);
+} else {
+    initCalendar();
 }
